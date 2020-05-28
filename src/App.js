@@ -1,9 +1,10 @@
 import React from 'react';
 import './App.css';
 import Contact from './Contact';
+import ContactsTop from './ContactsTop'
 
 class App extends React.Component {
-  state = {
+  state = {   
     contacts: [
       {
         "id": "1",
@@ -34,14 +35,26 @@ class App extends React.Component {
 
   removeContact = contact => {
     this.setState(previousState => ({contacts: previousState.contacts.filter(stateContact => stateContact !== contact)}));
+  }  
+
+  createContact = (name, email, avatar) => {
+    this.setState(previousState => ({
+      contacts: [...previousState.contacts, {
+        name: name,
+        email: email,
+        avatarURL: avatar,
+      }]
+    }))
   }
   
-  render = () => {    
-    return ( 
-      <ol className='contacts-list'>
-        {this.state.contacts.map(contact => <Contact key={contact.id} contact={contact} onRemoveContact={this.removeContact} /> )}     
-      </ol>
-      
+  render = () => {
+    return (
+      <div className='list-contacts'>
+        <ContactsTop createContact={this.createContact}/>
+        <ol className='contacts-list'>
+          {this.state.contacts.map(contact => <Contact key={contact.id} contact={contact} onRemoveContact={this.removeContact} /> )}     
+        </ol>
+      </div>    
     );
   }  
 }
