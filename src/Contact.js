@@ -9,7 +9,7 @@ function Contact(props) {
         <p>{props.contact.name}</p>
         <p>{props.contact.email}</p>
       </div>
-      <button className='contact-remove' onClick={() => props.onRemoveContact(props.contact)}>
+      <button className='contact-remove' onClick={() => props.onDeleteContact(props.contact)}>
         Remove
       </button>
     </li>

@@ -1,10 +1,11 @@
 import React from 'react';
 import './App.css';
-import Contact from './Contact';
+import ListContacts from './ListContacts';
+import CreateContact from './CreateContact';
+import { Route, Switch } from 'react-router-dom'
 
 class App extends React.Component {
   state = {
-    query: "",
     contacts: [
       {
         "id": "1",
@@ -37,43 +38,35 @@ class App extends React.Component {
     this.setState(previousState => ({contacts: previousState.contacts.filter(stateContact => stateContact !== contact)}));
   }
 
-  createContact = (name, email, avatar) => {
+  createContact = (name, email, avatarURL) => {
     this.setState(previousState => ({
       contacts: [...previousState.contacts, {
         name: name,
         email: email,
-        avatarURL: avatar,
+        avatarURL: avatarURL,
       }]
     }))
   }
 
-  updateQuery = e => {
-    this.setState({query: e.target.value})
-  }
-
   render = () => {
-    let contacts = [...this.state.contacts];
-
-    if (this.state.query) {
-      contacts = contacts.filter(contact => contact.name.includes(this.state.query));
-    }
-
     return (
-      <div className='list-contacts'>
-        <div className='list-contacts-top'>
-          <input
-            className='search-contacts'
-            type='text'
-            placeholder='Filter Contacts'
-            value={this.state.query}
-            onChange={this.updateQuery}
+      <Switch>
+        <Route exact path='/' render={() => (
+          <ListContacts
+              contacts={this.state.contacts}
+              onDeleteContact={this.removeContact}
+            />
+        )} />
+
+        <Route path='/create' render={(history) => (
+          <CreateContact
+            onCreateContact={(contact) => {
+              this.createContact(contact)
+              history.push('/')
+            }}
           />
-          <a href="" className='add-contact' onClick={this.addContact} >Add Contact</a>
-        </div>
-        <ol className='contacts-list'>
-          {contacts.map(contact => <Contact key={contact.id} contact={contact} onRemoveContact={this.removeContact} /> )}
-        </ol>
-      </div>
+        )} />
+      </Switch>
     );
   }
 }
