@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from "react-router-dom";
 
  class Header extends React.Component {
   state = {
@@ -20,7 +21,7 @@ import React from 'react';
           value={this.state.filterInput}
           onChange={this.updateFilterInput}
         />
-        <a href="" className='add-contact'>Add Contact</a>
+        <Link to="/newContact" className='add-contact'>Add Contact</Link>
       </div>
     );
   }
