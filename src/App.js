@@ -77,14 +77,9 @@ const App = () => {
           </ol>
         </div>
       </Route>
-      <Route exact path="/newContact" render={({history}) => (
-        <CreateContact
-          addContact={(contact) => {
-            addContact(contact);
-            history.push('/');
-          }}
-        />
-      )} />
+      <Route exact path="/newContact">
+        <CreateContact addContact={addContact}/>
+      </Route>
     </Switch>
   );
 
