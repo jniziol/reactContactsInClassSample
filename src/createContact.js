@@ -1,37 +1,42 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
+import { useHistory } from 'react-router-dom';
 
-class CreateContact extends Component {
-  state = {
+const CreateContact = (props) => {
+  const history = useHistory();
+
+  const [inputs, setInput] = useState({
     avatarURL: "",
     name: "",
     email: "",
+  });
+
+  const onFieldUpdate = (e) => {
+    e.persist();
+    setInput(prevInput => ({
+      ...prevInput, [e.target.name]: e.target.value
+    }));
   }
 
-  onFieldUpdate = (e) => {
-    this.setState({[e.target.name]: e.target.value});
-  }
-
-  handleSubmit = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    this.props.addContact(this.state);
-    this.setState({avatarURL: "", name: "", email: ""})
+    props.addContact(inputs);
+    setInput({avatarURL: "", name: "", email: ""})
+    history.push("/");
   }
 
-  render() {
-    return (
-      <div>
-        <a className='close-create-contact' href='/'>Close</a>
-        <form onSubmit={this.handleSubmit} className='create-contact-form'>
-          <div className='create-contact-details'>
-            <input onChange={this.onFieldUpdate} type="text" name='avatarURL' placeholder='avatarURL' value={this.state.avatarURL}/>
-            <input onChange={this.onFieldUpdate} type='text' name='name' placeholder='Name' value={this.state.name}/>
-            <input onChange={this.onFieldUpdate} type='text' name='email' placeholder='Email' value={this.state.email}/>
-            <button>Add Contact</button>
-          </div>
-        </form>
-      </div>
-    )
-  }
+  return (
+    <div>
+      <a className='close-create-contact' href='/'>Close</a>
+      <form onSubmit={handleSubmit} className='create-contact-form'>
+        <div className='create-contact-details'>
+          <input onChange={onFieldUpdate} type="text" name='avatarURL' placeholder='avatarURL' value={inputs.avatarURL}/>
+          <input onChange={onFieldUpdate} type='text' name='name' placeholder='Name' value={inputs.name}/>
+          <input onChange={onFieldUpdate} type='text' name='email' placeholder='Email' value={inputs.email}/>
+          <button>Add Contact</button>
+        </div>
+      </form>
+    </div>
+  )
 }
 
 export default CreateContact

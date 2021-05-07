@@ -1,83 +1,93 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import Contact from './Contact'
 import Header from './Header'
 import CreateContact from './createContact'
 import { Switch, Route } from "react-router-dom";
 
-class App extends React.Component {
-  state = {
-    query: "",
-    contacts: []
-  }
+const App = () => {
+  const [contacts, setContacts] = useState([]);
+  const [query, setQuery] = useState("");
 
-  componentDidMount = async () => {
-    const response = await fetch('https://60897e8a8c8043001757eed6.mockapi.io/api/contacts');
-    const contacts = await response.json();
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await fetch('http://localhost:5000/contacts');
+      const contacts = await response.json();
 
-    this.setState({contacts});
-  }
-
-  filterContacts = (value) => {
-    this.setState({query: value});
-  }
-
-  addContact = (contact) => {
-    this.setState(currentState => {
-      return {
-        contacts: [...currentState.contacts, contact]
-      }
-    });
-  }
-
-  removeContact = (id) => {
-    this.setState(currentState => {
-      return {
-        contacts: currentState.contacts.filter(contact => contact.id !== id)
-      }
-    });
-  }
-
-  render() {
-    let display;
-
-    if (this.state.contacts.length > 0) {
-      display = this.state.contacts
-        .filter(contact => contact.name.includes(this.state.query))
-        .map((contact) => (
-          <Contact key={contact.id} contact={contact} removeContact={this.removeContact} />
-      ));
-    } else {
-      display = <h2>There are no contacts to display</h2>;
+      setContacts(contacts);
     }
 
-    return (
-      <Switch>
-        <Route exact path="/">
-          <div className='list-contacts'>
-            <Header filterContacts={this.filterContacts} />
-            <ol className='contacts-list'>
-              {
-                this.state.contacts
-                  .filter(contact => contact.name.includes(this.state.query))
-                  .map((contact) => (
-                    <Contact key={contact.id} contact={contact} removeContact={this.removeContact} />
-                ))
-              }
-            </ol>
-          </div>
-        </Route>
-        <Route exact path="/newContact" render={({history}) => (
-          <CreateContact
-            addContact={(contact) => {
-              this.addContact(contact);
-              history.push('/');
-            }}
-          />
-        )} />
-      </Switch>
-    );
+    fetchData();
+  }, [])
+
+  const filterContacts = (value) => {
+    setQuery(value);
   }
+
+  const addContact = async (contact) => {
+    const contacts = await fetch(`http://localhost:5000/contacts/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(contact)
+    });
+
+    setContacts(currentContacts => {
+      return [...currentContacts, contact]
+    });
+  }
+
+  const removeContact = async (id) => {
+    await fetch(`http://localhost:5000/contacts/${id}`, {
+      method: 'DELETE'
+    });
+
+    setContacts(currentContacts => {
+      return currentContacts.filter(contact => contact.id !== id)
+    });
+  }
+
+
+  let display;
+
+  if (contacts.length > 0) {
+    display = contacts
+      .filter(contact => contact.name.includes(query))
+      .map((contact) => (
+        <Contact key={contact.id} contact={contact} removeContact={removeContact} />
+    ));
+  } else {
+    display = <h2>There are no contacts to display</h2>;
+  }
+
+  return (
+    <Switch>
+      <Route exact path="/">
+        <div className='list-contacts'>
+          <Header filterContacts={filterContacts} />
+          <ol className='contacts-list'>
+            {
+              contacts
+                .filter(contact => contact.name.includes(query))
+                .map((contact) => (
+                  <Contact key={contact.id} contact={contact} removeContact={removeContact} />
+              ))
+            }
+          </ol>
+        </div>
+      </Route>
+      <Route exact path="/newContact" render={({history}) => (
+        <CreateContact
+          addContact={(contact) => {
+            addContact(contact);
+            history.push('/');
+          }}
+        />
+      )} />
+    </Switch>
+  );
+
 }
 
 export default App;
