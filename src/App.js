@@ -1,81 +1,88 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
-import Contact from './Contact';
+import Contact from './Contact'
+import Header from './Header'
+import CreateContact from './createContact'
+import { Switch, Route } from "react-router-dom";
 
-class App extends React.Component {
-  state = {
-    query: "",
-    contacts: [
-      {
-        "id": "1",
-        "name": "Captain America",
-        "email": "cap@avengers.com",
-        "avatarURL": "https://66.media.tumblr.com/3956a5fb5563f14f6b060dc98c3a2dda/tumblr_nogjowrCWK1t7cmmpo1_1280.png",
-      },
-      {
-        "id": "2",
-        "name": "Ironman",
-        "email": "ironman@avengers.com",
-        "avatarURL": "https://ironmanhelmetshop.com/wp-content/uploads/2015/10/ironman_1x.jpg",
-      },
-      {
-        "id": "3",
-        "name": "Thanos",
-        "email": "thanos@avengers.com",
-        "avatarURL": "https://cdn.dribbble.com/users/458522/screenshots/4588058/thanos_1x.jpg",
-      },
-      {
-        "id": "4",
-        "name": "Ultron 6",
-        "email": "ultron-6@avengers.com",
-        "avatarURL": "https://vignette.wikia.nocookie.net/marveldatabase/images/3/36/Ultron_%28Earth-616%29_from_Avengers_Vol_1_66_0001.jpg/revision/latest/scale-to-width-down/340?cb=20161020042955",
-      },
-    ]
-  }
+const App = () => {
+  const [contacts, setContacts] = useState([]);
+  const [query, setQuery] = useState("");
 
-  removeContact = contact => {
-    this.setState(previousState => ({contacts: previousState.contacts.filter(stateContact => stateContact !== contact)}));
-  }
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await fetch('http://localhost:5000/contacts');
+      const contacts = await response.json();
 
-  createContact = (name, email, avatar) => {
-    this.setState(previousState => ({
-      contacts: [...previousState.contacts, {
-        name: name,
-        email: email,
-        avatarURL: avatar,
-      }]
-    }))
-  }
-
-  updateQuery = e => {
-    this.setState({query: e.target.value})
-  }
-
-  render = () => {
-    let contacts = [...this.state.contacts];
-
-    if (this.state.query) {
-      contacts = contacts.filter(contact => contact.name.includes(this.state.query));
+      setContacts(contacts);
     }
 
-    return (
-      <div className='list-contacts'>
-        <div className='list-contacts-top'>
-          <input
-            className='search-contacts'
-            type='text'
-            placeholder='Filter Contacts'
-            value={this.state.query}
-            onChange={this.updateQuery}
-          />
-          <a href="" className='add-contact' onClick={this.addContact} >Add Contact</a>
-        </div>
-        <ol className='contacts-list'>
-          {contacts.map(contact => <Contact key={contact.id} contact={contact} onRemoveContact={this.removeContact} /> )}
-        </ol>
-      </div>
-    );
+    fetchData();
+  }, [])
+
+  const filterContacts = (value) => {
+    setQuery(value);
   }
+
+  const addContact = async (contact) => {
+    const contacts = await fetch(`http://localhost:5000/contacts/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(contact)
+    });
+
+    setContacts(currentContacts => {
+      return [...currentContacts, contact]
+    });
+  }
+
+  const removeContact = async (id) => {
+    await fetch(`http://localhost:5000/contacts/${id}`, {
+      method: 'DELETE'
+    });
+
+    setContacts(currentContacts => {
+      return currentContacts.filter(contact => contact.id !== id)
+    });
+  }
+
+
+  let display;
+
+  if (contacts.length > 0) {
+    display = contacts
+      .filter(contact => contact.name.includes(query))
+      .map((contact) => (
+        <Contact key={contact.id} contact={contact} removeContact={removeContact} />
+    ));
+  } else {
+    display = <h2>There are no contacts to display</h2>;
+  }
+
+  return (
+    <Switch>
+      <Route exact path="/">
+        <div className='list-contacts'>
+          <Header filterContacts={filterContacts} />
+          <ol className='contacts-list'>
+            {
+              contacts
+                .filter(contact => contact.name.includes(query))
+                .map((contact) => (
+                  <Contact key={contact.id} contact={contact} removeContact={removeContact} />
+              ))
+            }
+          </ol>
+        </div>
+      </Route>
+      <Route exact path="/newContact">
+        <CreateContact addContact={addContact}/>
+      </Route>
+    </Switch>
+  );
+
 }
 
 export default App;

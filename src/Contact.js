@@ -9,11 +9,11 @@ function Contact(props) {
         <p>{props.contact.name}</p>
         <p>{props.contact.email}</p>
       </div>
-      <button className='contact-remove' onClick={() => props.onRemoveContact(props.contact)}>
+      <button className='contact-remove' onClick={(e) => props.removeContact(props.contact.id)}>
         Remove
       </button>
     </li>
   );
 }
 
-export default Contact
+export default Contact;
