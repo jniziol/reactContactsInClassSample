@@ -1,30 +1,38 @@
-import React from 'react';
-import { Link } from "react-router-dom";
+import React, { useState } from 'react';
+import { Link, useHistory } from "react-router-dom";
 
- class Header extends React.Component {
-  state = {
-    filterInput: ""
+const Header = () => {
+  const [filterInput, setFilterInput] = useState("")
+  const history = useHistory();
+
+  const updateFilterInput = (e) => {
+    setFilterInput(e.target.value);
   }
 
-  updateFilterInput = (e) => {
-    this.setState({filterInput: e.target.value});
-    this.props.filterContacts(e.target.value);
+  const onSearch = (e) => {
+    e.preventDefault();
+    history.push({
+      pathname: 'search',
+      search: `query=${filterInput}`
+    });
   }
 
-  render() {
-    return (
-      <div className='list-contacts-top'>
+  return (
+    <div className='list-contacts-top'>
+      <form onSubmit={onSearch}>
         <input
           className='search-contacts'
           type='text'
           placeholder='Filter Contacts'
-          value={this.state.filterInput}
-          onChange={this.updateFilterInput}
+          value={filterInput}
+          onChange={updateFilterInput}
         />
-        <Link to="/newContact" className='add-contact'>Add Contact</Link>
-      </div>
-    );
-  }
+      </form>
+
+      <Link to="/contact/new" className='add-contact'>Add Contact</Link>
+    </div>
+  );
+
 }
 
 export default Header;

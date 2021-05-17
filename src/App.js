@@ -4,47 +4,35 @@ import Contact from './Contact'
 import Header from './Header'
 import CreateContact from './createContact'
 import { Switch, Route } from "react-router-dom";
+import ContactDetails from './ContactDetails';
+import Search from './Search';
 
 const App = () => {
   const [contacts, setContacts] = useState([]);
   const [query, setQuery] = useState("");
 
   useEffect(() => {
-    const fetchData = async () => {
-      const response = await fetch('http://localhost:5000/contacts');
-      const contacts = await response.json();
-
-      setContacts(contacts);
-    }
-
-    fetchData();
-  }, [])
+    const contacts = localStorage.getItem('contacts');
+    setContacts(JSON.parse(contacts) || []);
+  }, []);
 
   const filterContacts = (value) => {
     setQuery(value);
   }
 
-  const addContact = async (contact) => {
-    const contacts = await fetch(`http://localhost:5000/contacts/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(contact)
-    });
-
+  const addContact = (contact) => {
     setContacts(currentContacts => {
-      return [...currentContacts, contact]
+      const contacts = [...currentContacts, contact];
+      localStorage.setItem('contacts', JSON.stringify(contacts));
+      return contacts;
     });
   }
 
-  const removeContact = async (id) => {
-    await fetch(`http://localhost:5000/contacts/${id}`, {
-      method: 'DELETE'
-    });
-
+  const removeContact = (id) => {
     setContacts(currentContacts => {
-      return currentContacts.filter(contact => contact.id !== id)
+      const contacts = currentContacts.filter(contact => contact.id !== id);
+      localStorage.setItem('contacts', JSON.stringify(contacts));
+      return contacts;
     });
   }
 
@@ -77,8 +65,16 @@ const App = () => {
           </ol>
         </div>
       </Route>
-      <Route exact path="/newContact">
+      <Route path="/contact/new">
         <CreateContact addContact={addContact}/>
+      </Route>
+
+      <Route path="/contacts/:id">
+        <ContactDetails contact={contacts}/>
+      </Route>
+
+      <Route path="/search">
+        <Search contacts={contacts}/>
       </Route>
     </Switch>
   );
